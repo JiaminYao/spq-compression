@@ -127,7 +127,7 @@ Basic run
 python main.py
 ```
 
-Custom example
+Custom example using best settings for SPQ:
 ```bash
 python main.py \
   --model_name llama7b \
