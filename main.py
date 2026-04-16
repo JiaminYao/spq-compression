@@ -39,8 +39,7 @@ def main(model_name="llama7b", max_prune_ratio=0.05, variance_threshold = 0.96, 
     layers = cfg["num_layers"]
 
     device = torch.device("cuda:0")
-    device2 = torch.device("cuda:1")
-    
+
     model = model.to(device)
     # print(model.dtype)
     
@@ -134,15 +133,13 @@ def main(model_name="llama7b", max_prune_ratio=0.05, variance_threshold = 0.96, 
     torch.cuda.empty_cache()
     gc.collect()
 
-    model = model.to(device2)
-
     inject_lora_adapters(model, model_type=model_type)
-    fine_tune(model, tokenizer, device=device2, max_steps=steps)
+    fine_tune(model, tokenizer, device=device, max_steps=steps)
 
     print(f"Evaluating after SPQ compression")
     mem_after = get_mem_size_gb(model)
-    ppl_after = calculate_perplexity(model.eval(), tokenizer, sample_text, device=device2)
-    thr_after = evaluate_throughput(model.eval(), tokenizer, sample_text, device=device2)
+    ppl_after = calculate_perplexity(model.eval(), tokenizer, sample_text, device=device)
+    thr_after = evaluate_throughput(model.eval(), tokenizer, sample_text, device=device)
     
     print(f"[Before Compression] MEM Size: {mem_before:,.2f} GB")
     print(f"[After Compression]  MEM Size: {mem_after:,.2f} GB")

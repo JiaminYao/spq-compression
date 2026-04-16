@@ -1,6 +1,9 @@
 # SPQ: An Ensemble Technique for LLM Compression
 
 <p align="center">
+  <a href="https://arxiv.org/abs/2602.18420">
+    <img src="https://img.shields.io/badge/arXiv-2602.18420-b31b1b.svg" alt="arXiv">
+  </a>
   <a href="https://www.apache.org/licenses/LICENSE-2.0">
     <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License">
   </a>
@@ -21,7 +24,6 @@
   </a>
 </p>
 
-
 <p align="center">
   <a href="https://huggingface.co/meta-llama/Llama-2-7b-hf">
     <img src="https://img.shields.io/badge/LLMs-LLaMA--2--7B-F8C471?labelColor=555555" alt="LLaMA-2-7B" />
@@ -37,72 +39,62 @@
   </a>
 </p>
 
+<p align="center">
+  <b>Accepted to LREC 2026 Main Conference</b>
+  <br>
+  <a href="https://arxiv.org/abs/2602.18420">Paper</a>
+</p>
 
 ## Introduction
-This repository provides an emsemble technique to compress large language models using:
 
-- Variance-Retained Low-Rank SVD  
-- Activation-based Structured Pruning
-- INT8 Linear Quantization  
+SPQ is an ensemble compression framework that combines three complementary techniques to reduce the size of large language models while preserving generation quality:
 
-It supports LLaMA, OPT, Mistral, and Vicuna models from Hugging Face.
+- **Variance-Retained Low-Rank SVD** — decomposes weight matrices into low-rank approximations, retaining a configurable amount of variance.
+- **Activation-based Structured Pruning** — removes less important attention heads and MLP neurons based on activation magnitudes.
+- **INT8 Linear Quantization** — quantizes remaining weights to 8-bit integers with per-channel or mixed-granularity scaling.
 
 ## Quick Start
 
-### Installation
-Create and set up a conda environment with python version 3.11
+### 1. Environment Setup
+
 ```bash
 conda create -n spq python=3.11
 conda activate spq
-```
-
-Download and navigate to the repository
-https://anonymous.4open.science/r/SPQ_Compression-84EA
-```bash
-cd SPQ_Compression-84EA
-```
-
-Install requirements.txt
-```bash
+git clone https://github.com/JiaminYao/SPQ_LLM_Compression.git
+cd SPQ_LLM_Compression
 pip install -r requirements.txt
 ```
 
-### Model Access
-Login with model token in terminal
+One GPU with at least 40GB VRAM is required (e.g., A100 40GB).
+
+### 2. Hugging Face Access
+
+Some models require gated access (e.g., LLaMA, Mistral). Create a token with at least read permission at https://huggingface.co/settings/tokens, then log in:
+
 ```bash
 huggingface-cli login
 ```
 
-### Quick Example
+### 3. Run
+
 ```bash
 python main.py
 ```
 
-## Step-by-Step Instructions of SPQ
+Custom example with recommended settings:
 
-### 1. Installation
-The code is available anonymously at:
-https://anonymous.4open.science/r/SPQ_Compression-84EA/
 ```bash
-cd SPQ_Compression-84EA
-pip install -r requirements.txt
+python main.py \
+  --model_name llama7b \
+  --max_prune_ratio 0.05 \
+  --variance_threshold 0.96 \
+  --quant_mode mix_percentile \
+  --steps 200
 ```
-Two GPUs are required (e.g., GPU 0 for pruning/SVD/quantization, GPU 1 for LoRA fine-tuning).
 
-### 2. Hugging Face Access
-Models require gated access (e.g. LLaMA, Mistral, Vicuna).
+## Supported Models
 
-Step 1: Get a token
-https://huggingface.co/settings/tokens
-Create a token with at least read permission.
-
-Step 2: Login in terminal
-huggingface-cli login
-Paste your token when prompted.
-
-### 3. Supported Model Names
-
-Use these strings in --model_name:
+Use these strings for the `--model_name` argument:
 
 | model_name  | Hugging Face ID |
 |-------------|------------------|
@@ -115,41 +107,33 @@ Use these strings in --model_name:
 | mistral7b   | mistralai/Mistral-7B-v0.1 |
 | vicuna7b    | lmsys/vicuna-7b-v1.5 |
 
-Example (in code):
-model, tokenizer = get_model_and_data("llama7b")
+## Arguments
 
-### 4. Run with Python CLI
-
-The script uses argparse, so you can change parameters via terminal.
-
-Basic run
-```bash
-python main.py
-```
-
-Custom example using best settings for SPQ:
-```bash
-python main.py \
-  --model_name llama7b \
-  --max_prune_ratio 0.05 \
-  --variance_threshold 0.96 \
-  --quant_mode mix_name\
-  --steps 200
-```
-
-Argument list
 | Argument | Description |
 |----------|-------------|
-| `--model_name` | Pretrained model to load |
-| `--max_prune_ratio` | Max prune ratio (0-1) |
-| `--variance_threshold` | SVD retained energy (0–1) |
-| `--quant_mode` | channel / tensor / mix_name / mix_percentile / mix_adaptive |
-| `--steps` | Steps for Fine-tuning |
+| `--model_name` | Pretrained model to load (default: `llama7b`) |
+| `--max_prune_ratio` | Maximum pruning ratio, 0–1 |
+| `--variance_threshold` | SVD retained variance, 0–1 |
+| `--quant_mode` | `channel` / `tensor` / `mix_name` / `mix_percentile` / `mix_adaptive` |
+| `--steps` | LoRA fine-tuning steps |
 
-## What the pipeline reports
+## Pipeline Output
 
 | Metric | Description |
 |--------|-------------|
-| Weight Memory | Model size before vs after compression |
-| Perplexity | Language modeling quality before vs after |
-| Throughput | Tokens/sec inference speed before vs after |
+| Weight Memory | Model size before vs. after compression |
+| Perplexity | Language modeling quality before vs. after |
+| Throughput | Tokens/sec inference speed before vs. after |
+
+## Citation
+
+If you find this work useful, please cite:
+
+```bibtex
+@article{yao2026spq,
+  title={SPQ: An Ensemble Technique for Large Language Model Compression},
+  author={Yao, Jiamin and Gultepe, Eren},
+  journal={arXiv preprint arXiv:2602.18420},
+  year={2026}
+}
+```
