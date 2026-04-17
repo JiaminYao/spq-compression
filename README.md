@@ -60,8 +60,8 @@ SPQ is an ensemble compression framework that combines three complementary techn
 ```bash
 conda create -n spq python=3.11
 conda activate spq
-git clone https://github.com/JiaminYao/SPQ_LLM_Compression.git
-cd SPQ_LLM_Compression
+git clone https://github.com/JiaminYao/spq-compression.git
+cd spq-compression
 pip install -r requirements.txt
 ```
 
